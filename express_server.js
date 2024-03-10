@@ -7,7 +7,7 @@ function generateRandomString() {
     randomURL += characters.charAt(random);
   }
 
-  return randomString;
+  return randomURL;
 }
 
 const express = require("express");
@@ -41,13 +41,13 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.redirect("/urls/:id"); 
+  const longURL = req.body.longURL;
+  const shortURL = generateRandomString();
+
+  urlDatabase[shortURL] = longURL;
+
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -70,4 +70,19 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("URL not found");
+  }
+});
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
