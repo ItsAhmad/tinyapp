@@ -21,6 +21,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.post("/urls", (req, res) => {
+  const longURL = req.body.longURL;
+  const shortURL = generateRandomString();
+
+  urlDatabase[shortURL] = longURL;
+
+  //res.redirect("/urls/:id");
+});
+
+// Example usage of the existing urlDatabase
+app.get("/urls", (req, res) => {
+  res.json(urlDatabase);
+});
+
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
@@ -33,7 +47,7 @@ app.listen(PORT, () => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect("/urls/:id"); 
 });
 
 app.get("/urls.json", (req, res) => {
