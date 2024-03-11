@@ -20,6 +20,12 @@
     </div>
 
 
+    <% if (username) { %>
+      <span class="navbar-text">
+        Welcome, <%= username %>!
+      </span>
+    <% } %>
+
 
     <form class="form-inline" method="POST" action="/login">
       <div class="form-group mx-sm-2">
