@@ -23,6 +23,14 @@
         </p>
       </div>
       <div class="card-footer text-muted"></div>
+      <form method="POST" action="/urls/<%= id %>/update">
+        <div class="form-group">
+          <label for="newLongURL">New Long URL:</label>
+          <input type="text" class="form-control" id="newLongURL" name="newLongURL" placeholder="Enter new long URL">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
     </div>
     <!-- Bootstrap JS -->
     <script
