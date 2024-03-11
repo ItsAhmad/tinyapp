@@ -21,18 +21,21 @@
 
 
     <% if (username) { %>
-      <span class="navbar-text">
+      <span class="navbar-text mr-2">
         Welcome, <%= username %>!
       </span>
+      <form class="form-inline" method="POST" action="/logout">
+        <button type="submit" class="btn btn-light">Logout</button>
+      </form>
+    <% } else { %>
+      <form class="form-inline" method="POST" action="/login">
+        <div class="form-group mx-sm-2">
+          <label for="username" class="sr-only">Username</label>
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+        </div>
+        <button type="submit" class="btn btn-light">Login</button>
+      </form>
     <% } %>
-
-
-    <form class="form-inline" method="POST" action="/login">
-      <div class="form-group mx-sm-2">
-        <label for="username" class="sr-only">Username</label>
-        <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-      </div>
-      <button type="submit" class="btn btn-light">Login</button>
-    </form>
+    
   </nav>
 </header>
