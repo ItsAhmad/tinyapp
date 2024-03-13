@@ -91,7 +91,7 @@ app.get("/register", (req, res) => {
 });
 
 app.use((req, res, next) => {
-  res.locals.username = req.cookies["username"];
+  res.locals.user = getUserById(req.session.user_id);
   next();
 });
 
@@ -170,9 +170,9 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
 
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -185,8 +185,9 @@ app.get("/hello", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
+  const user = getUserById(req.session.user_id);
   const templateVars = {
-    username: req.cookies["username"],
+    user: user,
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
