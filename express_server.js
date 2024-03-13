@@ -224,7 +224,7 @@ app.get("/u/:id", (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.status(404).send("URL not found");
+    res.status(404).send("URL not found. <a href='/urls'>Go back to URLs</a>");
   }
 });
 
