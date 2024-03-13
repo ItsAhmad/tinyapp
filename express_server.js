@@ -101,8 +101,8 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  let email = req.body.email.trim();
+  let password = req.body.password.trim();
 
   if (!validateLoginInput(email, password)) {
     return res.status(400).send("Email and password cannot be empty.");
