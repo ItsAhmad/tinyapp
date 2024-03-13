@@ -10,9 +10,26 @@ function generateRandomString() {
   return randomURL;
 }
 
+const getUserById = function (userId) {
+  return users[userId] || null;
+};
+
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 app.set("view engine", "ejs");
 
@@ -30,12 +47,22 @@ app.post("/urls", (req, res) => {
   //res.redirect("/urls/:id");
 });
 
-// Example usage of the existing urlDatabase
 app.get("/urls", (req, res) => {
-  res.json(urlDatabase);
+  const user = getUserById(req.session.user_id);
+  const templateVars = {
+    user: user
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
+
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -57,6 +84,27 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = longURL;
 
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!email || !password) {
+    return res.status(400).send("Email and password cannot be empty.");
+  }
+
+  const userId = generateRandomString();
+
+  users[userId] = {
+    id: userId,
+    email: email,
+    password: password,
+  };
+
+  req.session.user_id = userId;
+
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/update", (req, res) => {
