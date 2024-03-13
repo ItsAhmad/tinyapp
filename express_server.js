@@ -104,6 +104,10 @@ app.use((req, res, next) => {
 });
 
 app.post("/urls", (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(401).send("You need to be logged in to create new URLs. <a href='/login'>Login</a>");
+  }
+
   const longURL = req.body.longURL;
   const shortURL = generateRandomURL();
 
@@ -202,6 +206,10 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.session.user_id) {
+    return res.redirect("/login");
+  }
+
   res.render("urls_new");
 });
 
