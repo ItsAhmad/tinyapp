@@ -69,6 +69,10 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieSession({
