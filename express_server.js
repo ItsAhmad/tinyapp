@@ -147,9 +147,24 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
+  const email = req.body.email.trim();
+  const password = req.body.password.trim();
 
-  res.cookie("username", username);
+  if (!validateLoginInput(email, password)) {
+    return res.status(400).send("Email and password cannot be empty.");
+  }
+
+  const user = getUserByEmail(email);
+
+  if (!user) {
+    return res.status(403).send("User not found.");
+  }
+
+  if (user.password !== password) {
+    return res.status(403).send("Invalid password.");
+  }
+
+  req.session.user_id = user.id;
 
   res.redirect("/urls");
 });
