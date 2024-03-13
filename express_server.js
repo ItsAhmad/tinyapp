@@ -1,4 +1,4 @@
-function generateRandomString() {
+function generateRandomURL() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomURL = '';
 
@@ -9,6 +9,20 @@ function generateRandomString() {
 
   return randomURL;
 }
+
+const validateLoginInput = function (email, password) {
+  return email.trim() !== '' && password.trim() !== '';
+};
+
+
+const getUserByEmail = function (email) {
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      return users[userId];
+    }
+  }
+  return null;
+};
 
 const getUserById = function (userId) {
   return users[userId] || null;
@@ -40,7 +54,7 @@ const urlDatabase = {
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
-  const shortURL = generateRandomString();
+  const shortURL = generateRandomURL();
 
   urlDatabase[shortURL] = longURL;
 
@@ -79,7 +93,7 @@ app.use((req, res, next) => {
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
-  const shortURL = generateRandomString();
+  const shortURL = generateRandomURL();
 
   urlDatabase[shortURL] = longURL;
 
@@ -90,11 +104,15 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (!email || !password) {
+  if (!validateLoginInput(email, password)) {
     return res.status(400).send("Email and password cannot be empty.");
   }
 
-  const userId = generateRandomString();
+  if (getUserByEmail(email)) {
+    return res.status(400).send("User already exists. Please choose a different email.");
+  }
+
+  const userId = generateRandomURL();
 
   users[userId] = {
     id: userId,
