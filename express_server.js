@@ -28,16 +28,16 @@ const validateLoginInput = function (email, password) {
 
 
 const getUserByEmail = function (email) {
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
+  for (const userID in users) {
+    if (users[userID].email === email) {
+      return users[userID];
     }
   }
   return null;
 };
 
-const getUserById = function (userId) {
-  return users[userId] || null;
+const getUserById = function (userID) {
+  return users[userID] || null;
 };
 
 const express = require("express");
@@ -80,7 +80,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user = getUserById(req.session.useriD);
+  const user = getUserById(req.session.userID);
   const templateVars = {
     user: user
   };
@@ -88,7 +88,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.useriD) {
+  if (req.session.userID) {
     return res.redirect("/urls");
   }
 
@@ -146,17 +146,17 @@ app.post("/register", (req, res) => {
     return res.status(400).send("User already exists. Please choose a different email.");
   }
 
-  const userId = generateRandomURL();
+  const userID = generateRandomURL();
 
   const hashedPassword = bcrypt.hashSync(password, 10); // Hash the password
 
-  users[userId] = {
-    id: userId,
+  users[userID] = {
+    id: userID,
     email: email,
     password: hashedPassword
   };
 
-  req.session.user_id = userId;
+  req.session.user_id = userID;
 
   res.redirect("/urls");
 });
@@ -172,9 +172,6 @@ app.post("/urls/:id/update", (req, res) => {
 
 
 app.post("/urls/:id/delete", (req, res) => {
-  const shortURLToDelete = req.params.id;
-  delete urlDatabase[shortURLToDelete];
-
   if (!url) {
     return res.status(404).send("URL not found.");
   }
@@ -186,6 +183,9 @@ app.post("/urls/:id/delete", (req, res) => {
   if (url.userID !== req.session.userID) {
     return res.status(403).send("You do not have permission to access this URL.");
   }
+
+  const shortURLToDelete = req.params.id;
+  delete urlDatabase[shortURLToDelete];
 
   res.redirect("/urls");
 });
@@ -214,7 +214,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("userID");
+  req.session = null;
 
   res.redirect("/login");
 });
