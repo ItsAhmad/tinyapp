@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+
 function generateRandomURL() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomURL = '';
@@ -146,13 +148,15 @@ app.post("/register", (req, res) => {
 
   const userId = generateRandomURL();
 
+  const hashedPassword = bcrypt.hashSync(password, 10); // Hash the password
+
   users[userId] = {
     id: userId,
     email: email,
-    password: password,
+    password: hashedPassword
   };
 
-  req.session.userID = userId;
+  req.session.user_id = userId;
 
   res.redirect("/urls");
 });
@@ -200,11 +204,11 @@ app.post("/login", (req, res) => {
     return res.status(403).send("User not found.");
   }
 
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid password.");
   }
 
-  req.session.userID = user.id;
+  req.session.user_id = user.id;
 
   res.redirect("/urls");
 });
