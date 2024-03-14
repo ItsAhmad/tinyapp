@@ -10,6 +10,16 @@ function generateRandomURL() {
   return randomURL;
 }
 
+const urlsForUser = function(id) {
+  const userUrls = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userUrls[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userUrls;
+};
+
 const validateLoginInput = function (email, password) {
   return email.trim() !== '' && password.trim() !== '';
 };
@@ -218,9 +228,11 @@ app.get("/urls", (req, res) => {
     return res.send("<p>Please <a href='/login'>login</a> or <a href='/register'>register</a> to access this page.</p>");
   }
 
+  const userUrls = urlsForUser(req.session.user_id);
+
   const templateVars = {
     user: user,
-    urls: urlDatabase
+    urls: userUrls
   };
   res.render("urls_index", templateVars);
 });
