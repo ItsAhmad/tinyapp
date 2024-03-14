@@ -246,10 +246,23 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = {
-    id: shortURL,
-    longURL: urlDatabase[shortURL].longURL
-  };
+  const user = getUserById(req.session.user_id);
+  const shortURL = req.params.id;
+  const url = urlDatabase[shortURL];
+
+  if (!user) {
+    return res.send("<p>Please <a href='/login'>login</a> or <a href='/register'>register</a> to access this page.</p>");
+  }
+
+  if (!url) {
+    return res.status(404).send("URL not found.");
+  }
+
+  if (url.userID !== req.session.user_id) {
+    return res.status(403).send("You do not have permission to access this URL.");
+  }
+
+  const templateVars = { id: shortURL, longURL: url.longURL };
   res.render("urls_show", templateVars);
 });
 
