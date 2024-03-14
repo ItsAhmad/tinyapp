@@ -78,7 +78,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user = getUserById(req.session.user_id);
+  const user = getUserById(req.session.useriD);
   const templateVars = {
     user: user
   };
@@ -86,7 +86,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.useriD) {
     return res.redirect("/urls");
   }
 
@@ -107,7 +107,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userID) {
     return res.redirect("/urls");
   }
 
@@ -115,12 +115,12 @@ app.get("/register", (req, res) => {
 });
 
 app.use((req, res, next) => {
-  res.locals.user = getUserById(req.session.user_id);
+  res.locals.user = getUserById(req.session.userID);
   next();
 });
 
 app.post("/urls", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.userID) {
     return res.status(401).send("You need to be logged in to create new URLs. <a href='/login'>Login</a>");
   }
 
@@ -152,7 +152,7 @@ app.post("/register", (req, res) => {
     password: password,
   };
 
-  req.session.user_id = userId;
+  req.session.userID = userId;
 
   res.redirect("/urls");
 });
@@ -179,7 +179,7 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.status(401).send("You must be logged in to delete this URL.");
   }
 
-  if (url.userID !== req.session.user_id) {
+  if (url.userID !== req.session.userID) {
     return res.status(403).send("You do not have permission to access this URL.");
   }
 
@@ -204,13 +204,13 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid password.");
   }
 
-  req.session.user_id = user.id;
+  req.session.userID = user.id;
 
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  res.clearCookie("userID");
 
   res.redirect("/login");
 });
@@ -234,13 +234,13 @@ app.get("/hello", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const user = getUserById(req.session.user_id);
+  const user = getUserById(req.session.userID);
 
   if (!user) {
     return res.send("<p>Please <a href='/login'>login</a> or <a href='/register'>register</a> to access this page.</p>");
   }
 
-  const userUrls = urlsForUser(req.session.user_id);
+  const userUrls = urlsForUser(req.session.userID);
 
   const templateVars = {
     user: user,
@@ -250,7 +250,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {
+  if (!req.session.userID) {
     return res.redirect("/login");
   }
 
@@ -258,7 +258,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const user = getUserById(req.session.user_id);
+  const user = getUserById(req.session.userID);
   const shortURL = req.params.id;
   const url = urlDatabase[shortURL];
 
@@ -270,7 +270,7 @@ app.get("/urls/:id", (req, res) => {
     return res.status(404).send("URL not found.");
   }
 
-  if (url.userID !== req.session.user_id) {
+  if (url.userID !== req.session.userID) {
     return res.status(403).send("You do not have permission to access this URL.");
   }
 
