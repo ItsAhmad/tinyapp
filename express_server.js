@@ -213,6 +213,11 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = getUserById(req.session.user_id);
+
+  if (!user) {
+    return res.send("<p>Please <a href='/login'>login</a> or <a href='/register'>register</a> to access this page.</p>");
+  }
+
   const templateVars = {
     user: user,
     urls: urlDatabase
