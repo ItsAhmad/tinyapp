@@ -171,6 +171,18 @@ app.post("/urls/:id/delete", (req, res) => {
   const shortURLToDelete = req.params.id;
   delete urlDatabase[shortURLToDelete];
 
+  if (!url) {
+    return res.status(404).send("URL not found.");
+  }
+
+  if (!user) {
+    return res.status(401).send("You must be logged in to delete this URL.");
+  }
+
+  if (url.userID !== req.session.user_id) {
+    return res.status(403).send("You do not have permission to access this URL.");
+  }
+
   res.redirect("/urls");
 });
 
@@ -251,7 +263,7 @@ app.get("/urls/:id", (req, res) => {
   const url = urlDatabase[shortURL];
 
   if (!user) {
-    return res.send("<p>Please <a href='/login'>login</a> or <a href='/register'>register</a> to access this page.</p>");
+    return res.status(401).send("You must be logged in to edit this URL.");
   }
 
   if (!url) {
