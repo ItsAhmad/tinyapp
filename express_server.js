@@ -48,15 +48,21 @@ const users = {
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b6UTxQ": {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  "i3BoGr": {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomURL();
 
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL: longURL, userID: userID };
 
   //res.redirect("/urls/:id");
 });
@@ -111,7 +117,7 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomURL();
 
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL: longURL, userID: userID };
 
   res.redirect(`/urls/${shortURL}`);
 });
@@ -145,7 +151,7 @@ app.post("/urls/:id/update", (req, res) => {
   const shortURLToUpdate = req.params.id;
   const newLongURL = req.body.newLongURL;
 
-  urlDatabase[shortURLToUpdate] = newLongURL;
+  urlDatabase[shortURLToUpdate].longURL = newLongURL;
 
   res.redirect("/urls");
 });
@@ -188,7 +194,16 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  const urls = {};
+
+  for (const shortURL in urlDatabase) {
+    urls[shortURL] = {
+      longURL: urlDatabase[shortURL].longURL,
+      userID: urlDatabase[shortURL].userID
+    };
+  }
+
+  res.json(urls);
 });
 
 app.get("/hello", (req, res) => {
@@ -214,18 +229,20 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    id: shortURL,
+    longURL: urlDatabase[shortURL].longURL
+  };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
-    res.status(404).send("URL not found. <a href='/urls'>Go back to URLs</a>");
+  if (!urlDatabase[shortURL]) {
+    return res.status(404).send("URL not found. <a href='/urls'>Go back to URLs</a>");
   }
+
+  const longURL = urlDatabase[shortURL].longURL;
+  res.redirect(longURL);
 });
 
 
