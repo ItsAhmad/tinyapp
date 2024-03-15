@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
-const getUserByEmail = require('./tinyapp');
+const getUserByEmail = require('./helpers');
 
 
 
@@ -37,7 +37,7 @@ const getUserById = function (userID) {
 
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 
 const users = {
   userRandomID: {
@@ -92,6 +92,8 @@ app.get("/login", (req, res) => {
 
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.json());
+
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -124,7 +126,7 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomURL();
 
-  urlDatabase[shortURL] = { longURL: longURL, userID: userID };
+  urlDatabase[shortURL] = { longURL: longURL, userID: req.session.userID };
 
   res.redirect(`/urls/${shortURL}`);
 });
@@ -143,7 +145,7 @@ app.post("/register", (req, res) => {
 
   const userID = generateRandomURL();
 
-  const hashedPassword = bcrypt.hashSync(password, 10); // Hash the password
+  const hashedPassword = bcrypt.hashSync(password, 10); 
 
   users[userID] = {
     id: userID,

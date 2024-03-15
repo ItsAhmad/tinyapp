@@ -1,6 +1,9 @@
 const { assert } = require('chai');
-
 const { getUserByEmail } = require('../helpers.js');
+const chai = require("chai");
+const chaiHttp = require("chai-http");
+const expect = chai.expect;
+chai.use(chaiHttp);
 
 const testUsers = {
   "userRandomID": {
@@ -27,3 +30,64 @@ describe('getUserByEmail', function() {
     assert.isUndefined(user);
   });
 });
+
+
+describe("Login and Access Control Test", () => {
+  it('should return 403 status code for unauthorized access to "http://localhost:8080/urls/b2xVn2"', () => {
+    const agent = chai.request.agent("http://localhost:8080");
+    // Step 1: Login with valid credentials
+    return agent
+      .post("/login")
+      .send({ email: "user2@example.com", password: "dishwasher-funk" })
+      .then((loginRes) => {
+        // Step 2: Make a GET request to a protected resource
+        return agent.get("/urls/b2xVn2").then((accessRes) => {
+          // Step 3: Expect the status code to be 403
+          expect(accessRes).to.have.status(403);
+        });
+      });
+  });
+});
+
+describe('GET /', () => {
+  it('should redirect to /login', () => {
+    return chai.request('http://localhost:8080')
+      .get('/')
+      .then((res) => {
+        expect(res).to.redirect;
+        expect(res).to.redirectTo('http://localhost:8080/login');
+      });
+  });
+});
+
+describe('GET /urls/new', () => {
+  it('should redirect to /login', () => {
+    return chai.request('http://localhost:8080')
+      .get('/urls/new')
+      .then((res) => {
+        expect(res).to.redirect;
+        expect(res).to.redirectTo('http://localhost:8080/login');
+      });
+  });
+});
+
+describe('GET /urls/NOTEXISTS', () => {
+  it('should return status code 404', () => {
+    return chai.request('http://localhost:8080')
+      .get('/urls/NOTEXISTS')
+      .then((res) => {
+        expect(res).to.have.status(404);
+      });
+  });
+});
+
+describe('GET /urls/b2xVn2', () => {
+  it('should return status code 403', () => {
+    return chai.request('http://localhost:8080')
+      .get('/urls/b2xVn2')
+      .then((res) => {
+        expect(res).to.have.status(403);
+      });
+  });
+});
+
