@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
+const getUserByEmail = require('./tinyapp');
 
 
 
@@ -29,15 +30,6 @@ const validateLoginInput = function (email, password) {
   return email.trim() !== '' && password.trim() !== '';
 };
 
-
-const getUserByEmail = function (email) {
-  for (const userID in users) {
-    if (users[userID].email === email) {
-      return users[userID];
-    }
-  }
-  return null;
-};
 
 const getUserById = function (userID) {
   return users[userID] || null;
@@ -145,7 +137,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password cannot be empty.");
   }
 
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     return res.status(400).send("User already exists. Please choose a different email.");
   }
 
@@ -201,7 +193,7 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Email and password cannot be empty.");
   }
 
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if (!user) {
     return res.status(403).send("User not found.");
@@ -286,6 +278,8 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
+
   if (!urlDatabase[shortURL]) {
     return res.status(404).send("URL not found. <a href='/urls'>Go back to URLs</a>");
   }
