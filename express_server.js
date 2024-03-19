@@ -1,18 +1,27 @@
+const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
 const { getUserByEmail } = require('./helpers.js');
-const generateRandomURL = require('./helpers');
-const urlsForUser = require('./helpers');
+const { generateRandomURL } = require('./helpers.js');
+const { urlsForUser } = require('./helpers.js');
+const { urlDatabase } = require('./helpers.js');
+const { users } = require('./helpers.js');
 const bodyParser = require("body-parser");
-
-const express = require("express");
+//const session = require("express-session");
 const app = express();
 const PORT = 8080;
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
+
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 const validateLoginInput = function (email, password) {
   return email.trim() !== '' && password.trim() !== '';
@@ -21,30 +30,6 @@ const validateLoginInput = function (email, password) {
 
 const getUserById = function (userID) {
   return users[userID] || null;
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
-
-const urlDatabase = {
-  "b6UTxQ": {
-    longURL: "https://www.tsn.ca",
-    userID: "userRandomID", 
-  },
-  "i3BoGr": {
-    longURL: "https://www.google.ca",
-    userID: "user2RandomID", 
-  },
 };
 
 app.post("/urls", (req, res) => {
@@ -57,8 +42,10 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = getUserById(req.session.userID);
+  const userUrls = urlsForUser(req.session.userID);
   const templateVars = {
-    user: user
+    user: user,
+    urls: userUrls
   };
   res.render("urls_index", templateVars);
 });
@@ -72,11 +59,6 @@ app.get("/login", (req, res) => {
 
   res.render("login", { user: user }); 
 });
-
-app.use(cookieSession({
-  name: 'session',
-  keys: ['key1', 'key2']
-}));
 
 app.get("/", (req, res) => {
   res.redirect("/login");
