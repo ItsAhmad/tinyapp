@@ -39,11 +39,11 @@ const users = {
 const urlDatabase = {
   "b6UTxQ": {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
+    userID: "userRandomID", 
   },
   "i3BoGr": {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW",
+    userID: "user2RandomID", 
   },
 };
 
@@ -51,8 +51,9 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomURL();
 
-  urlDatabase[shortURL] = { longURL: longURL, userID: userID };
+  urlDatabase[shortURL] = { longURL: longURL, userID: req.session.userID }; 
 });
+
 
 app.get("/urls", (req, res) => {
   const user = getUserById(req.session.userID);
@@ -63,11 +64,13 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.userID) {
+  if (req.session && req.session.userID) {
     return res.redirect("/urls");
   }
 
-  res.render("login");
+  const user = res.locals.user; 
+
+  res.render("login", { user: user }); 
 });
 
 app.use(cookieSession({
@@ -100,7 +103,7 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomURL();
 
-  urlDatabase[shortURL] = { longURL: longURL, userID: req.session.userID };
+  urlDatabase[shortURL] = { longURL: longURL, userID: req.session.userID};
 
   res.redirect(`/urls/${shortURL}`);
 });
@@ -127,7 +130,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   };
 
-  req.session.user_id = userID;
+  req.session.userID = userID;
 
   res.redirect("/urls");
 });
@@ -164,12 +167,11 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email.trim();
   const password = req.body.password.trim();
+  const user = getUserByEmail(email, users);
 
   if (!validateLoginInput(email, password)) {
     return res.status(400).send("Email and password cannot be empty.");
   }
-
-  const user = getUserByEmail(email, users);
 
   if (!user) {
     return res.status(403).send("User not found.");
@@ -181,7 +183,11 @@ app.post("/login", (req, res) => {
 
   req.session.user_id = userID;
 
-  res.redirect("/urls");
+  if (req.session && req.session.userID) {
+    return res.redirect("/urls");
+  }
+
+  res.render("login", { user: user });
 });
 
 app.post("/logout", (req, res) => {
