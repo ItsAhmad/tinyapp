@@ -128,9 +128,14 @@ app.post("/urls/:id/update", (req, res) => {
 
 
 app.post("/urls/:id/delete", (req, res) => {
+  const shortURLToDelete = req.params.id;
+  const url = urlDatabase[shortURLToDelete];
+
   if (!url) {
     return res.status(404).send("URL not found.");
   }
+
+  const user = getUserById(req.session.userID);
 
   if (!user) {
     return res.status(403).send("You must be logged in to delete this URL.");
@@ -140,7 +145,6 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.status(403).send("You do not have permission to access this URL.");
   }
 
-  const shortURLToDelete = req.params.id;
   delete urlDatabase[shortURLToDelete];
 
   res.redirect("/urls");
