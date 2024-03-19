@@ -39,7 +39,7 @@ describe("Login and Access Control Test", () => {
     return agent
       .post("/login")
       .send({ email: "user2@example.com", password: "dishwasher-funk" })
-      .then((loginRes) => {
+      .then(() => {
         // Step 2: Make a GET request to a protected resource
         return agent.get("/urls/b2xVn2").then((accessRes) => {
           // Step 3: Expect the status code to be 403

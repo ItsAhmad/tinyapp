@@ -1,30 +1,18 @@
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
-const getUserByEmail = require('./helpers');
+const { getUserByEmail } = require('./helpers.js');
+const generateRandomURL = require('./helpers');
+const urlsForUser = require('./helpers');
+const bodyParser = require("body-parser");
 
+const express = require("express");
+const app = express();
+const PORT = 8080;
 
-
-function generateRandomURL() {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let randomURL = '';
-
-  for (let i = 0; i < 6; i++) {
-    const random = Math.floor(Math.random() * characters.length);
-    randomURL += characters.charAt(random);
-  }
-
-  return randomURL;
-}
-
-const urlsForUser = function(id) {
-  const userUrls = {};
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userUrls[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return userUrls;
-};
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const validateLoginInput = function (email, password) {
   return email.trim() !== '' && password.trim() !== '';
@@ -34,10 +22,6 @@ const validateLoginInput = function (email, password) {
 const getUserById = function (userID) {
   return users[userID] || null;
 };
-
-const express = require("express");
-const app = express();
-const PORT = 8080;
 
 const users = {
   userRandomID: {
@@ -51,8 +35,6 @@ const users = {
     password: "dishwasher-funk",
   },
 };
-
-app.set("view engine", "ejs");
 
 const urlDatabase = {
   "b6UTxQ": {
@@ -70,8 +52,6 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomURL();
 
   urlDatabase[shortURL] = { longURL: longURL, userID: userID };
-
-  //res.redirect("/urls/:id");
 });
 
 app.get("/urls", (req, res) => {
@@ -90,19 +70,13 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.json());
-
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
 
-app.use(bodyParser.urlencoded({ extended: true }));
-
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
@@ -174,7 +148,7 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 
   if (!user) {
-    return res.status(401).send("You must be logged in to delete this URL.");
+    return res.status(403).send("You must be logged in to delete this URL.");
   }
 
   if (url.userID !== req.session.userID) {
@@ -205,7 +179,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid password.");
   }
 
-  req.session.user_id = user.id;
+  req.session.user_id = userID;
 
   res.redirect("/urls");
 });
@@ -250,6 +224,10 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/urls/NOTEXISTS", (req, res) => {
+  res.status(404).send("URL not found.");
+});
+
 app.get("/urls/new", (req, res) => {
   if (!req.session.userID) {
     return res.redirect("/login");
@@ -264,7 +242,7 @@ app.get("/urls/:id", (req, res) => {
   const url = urlDatabase[shortURL];
 
   if (!user) {
-    return res.status(401).send("You must be logged in to edit this URL.");
+    return res.status(403).send("You must be logged in to edit this URL.");
   }
 
   if (!url) {
