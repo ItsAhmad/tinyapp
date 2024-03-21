@@ -7,7 +7,6 @@ const { urlsForUser } = require('./helpers.js');
 const { urlDatabase } = require('./helpers.js');
 const { users } = require('./helpers.js');
 const bodyParser = require("body-parser");
-//const session = require("express-session");
 const app = express();
 const PORT = 8080;
 
@@ -21,6 +20,12 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  if (req.session.userID) {
+    res.locals.user = getUserById(req.session.userID);
+  }
+  next();
+});
 
 
 const validateLoginInput = function (email, password) {
@@ -37,7 +42,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomURL();
 
   urlDatabase[shortURL] = { longURL: longURL, userID: req.session.userID }; 
-  //res.redirect("/urls");
+  res.redirect("/urls");
 });
 
 
@@ -71,11 +76,6 @@ app.get("/register", (req, res) => {
   }
 
   res.render("register");
-});
-
-app.use((req, res, next) => {
-  res.locals.user = getUserById(req.session.userID);
-  next();
 });
 
 app.post("/urls", (req, res) => {
@@ -178,7 +178,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session = null;
+  req.session = null; 
 
   res.redirect("/login");
 });
@@ -223,11 +223,11 @@ app.get("/urls/NOTEXISTS", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   if (!req.session.userID) {
-    return res.redirect("/login");
+    return res.redirect("/register");
   }
 
-  //res.render("urls_new");
-  res.redirect("/urls");
+  res.render("urls_new");
+  //res.redirect("/urls");
 });
 
 app.get("/urls/:id", (req, res) => {
