@@ -37,6 +37,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomURL();
 
   urlDatabase[shortURL] = { longURL: longURL, userID: req.session.userID }; 
+  //res.redirect("/urls");
 });
 
 
@@ -167,7 +168,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid password.");
   }
 
-  req.session.user_id = userID;
+  req.session.userID = user.id;
 
   if (req.session && req.session.userID) {
     return res.redirect("/urls");
@@ -225,7 +226,8 @@ app.get("/urls/new", (req, res) => {
     return res.redirect("/login");
   }
 
-  res.render("urls_new");
+  //res.render("urls_new");
+  res.redirect("/urls");
 });
 
 app.get("/urls/:id", (req, res) => {
